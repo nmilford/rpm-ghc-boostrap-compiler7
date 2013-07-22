@@ -74,11 +74,24 @@ mv %{buildroot}/usr/bin/hp2ps{,-%{version}}
 mv %{buildroot}/usr/bin/hpc{,-%{version}}
 mv %{buildroot}/usr/bin/hsc2hs{,-%{version}}
 mv %{buildroot}/usr/bin/runghc{,-%{version}}
-mv %{buildroot}/usr/bin/runhaskell{,-%{version}}
+rm -rf %{buildroot}/usr/bin/runhaskell{,-%{version}}
 
 install -d -m 755 %{buildroot}/usr/share/doc/ghc-%{version}
 install    -m 644 %{_builddir}/ghc-%{version}/README  %{buildroot}/usr/share/doc/ghc-%{version}
 install    -m 644 %{_builddir}/ghc-%{version}/LICENSE %{buildroot}/usr/share/doc/ghc-%{version}
+
+for file in ghc-%{version} ghci-%{version} ghc-pkg-%{version} haddock-ghc-%{version} hp2ps-%{version} hsc2hs-%{version} runghc-%{version}; do
+  sed -i -e  's|%{buildroot}||g' %{buildroot}%{_bindir}/$file
+done
+
+cd %{buildroot}/%{_libdir}/ghc-%{version}/package.conf.d/
+for pkg in *; do
+  sed -i -e  's|%{buildroot}||g' $pkg
+done
+cd -
+
+%post
+%{_bindir}/ghc-pkg-%{version} recache
 
 %files
 %defattr(-,root,root)
